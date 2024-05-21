@@ -1,5 +1,5 @@
 # import requests
-
+import deck
 # Player class 
 class Player:
     cards = []
@@ -60,7 +60,6 @@ bet = player.place_bet()
 
 
     
-
 
 
 
