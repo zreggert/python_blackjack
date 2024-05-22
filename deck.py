@@ -11,7 +11,6 @@ def new_deck():
     return deck
 
 # deck id variable calls the new deck function to request api response with a new shuffled deck
-deck_id = new_deck()
 
 # function to deal cards for a hand
 def get_hand(deck_id):
@@ -24,25 +23,67 @@ def get_hand(deck_id):
 
     return hand
 
+def draw_a_card(data):
+    card_drawn = requests.get(f'https://deckofcardsapi.com/api/deck/{data['deck_id']}/draw/?count=1')
+
+    for item in card_drawn.json()['cards']:
+        card = (item['value'], item['suit'])
+        data['player_hand'].append(card)
+    
+    return data
 
 
 # play hand function will call get_hand function to create plaer and dealer hands
-def play_hand():
+def play_hand(bet):
+    hand_data = {}
+
+    deck_id = new_deck()
+
     player_hand = get_hand(deck_id)
     player_sum = sum_of_hand(player_hand)
 
     dealer_hand = get_hand(deck_id)
     dealer_sum = sum_of_hand(dealer_hand)
     showing = dealer_hand[0]
+
+    # putting data into a dictionary that will be returned at the end of the function. this data will be used to determine the class player method that will be envoked later
+    hand_data["deck_id"] = deck_id
+    hand_data["bet"] = bet
+    hand_data["player_hand"] = player_hand
+    hand_data["player_sum"] = player_sum
+    hand_data["dealer_hand"] = dealer_hand
+    hand_data["dealer_sum"] = dealer_sum
     
     print(player_hand)
     print(f"You have a {player_sum}.")
     check_for_blackjack(player_sum)
+    # need to add functionality if player has blackjack
     print(f"Dealer is showing {showing}.")
 
     if showing[0] == "ACE" or showing[0] == "KING" or showing[0] == "QUEEN" or showing[0] == "JACK":
         check_for_blackjack(dealer_sum)
-    move = input("Hit? or Stay?")
+        # need to add fucntionality for if dealer has blackjack
+    return hand_data
+    
+    # while True:
+    #     move = input("Hit? or Stay?\n").lower()
+    #     if move != "hit" and move != "stay":
+    #         move = input("Hit? or Stay?")
+    #     elif move == "hit":
+    #         # call hit function
+    #         print("player hit")
+    #         # draw_a_card(deck_id, player_hand)
+    #         hand_data["move"] = move
+    #         return hand_data
+    #     elif move == "stay":
+    #         #call stay function here
+    #         print(f"player is staying on {player_sum}")
+    #         hand_data["move"] = move
+    #         return hand_data
+    #     else:
+    #         print("something else")
+
+
     
     # need to make functionality for hitting or staying and adding the new values to the players hand 
     # also need validation to the users input 
@@ -51,6 +92,7 @@ def play_hand():
 # checks is a hand is a blackjack
 def check_for_blackjack(num):
     if num == 21:
+        print("Blackjack!")
         return True
     else:
         pass
@@ -65,6 +107,10 @@ def sum_of_hand(hand):
             total += 10
         else:
             total += int(card[0])
+    
+    if total > 21:
+        print("Bust, you lose.")
+
     return total
 
 
