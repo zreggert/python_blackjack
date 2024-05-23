@@ -26,23 +26,30 @@ class Player:
         print(f"You now have {data["player_sum"]}")
 
     def hit_or_stay(self, data):
-        while True:
-            move = input("Hit? or Stay?\n").lower()
-            if move != "hit" and move != "stay":
-                move = input("Hit? or Stay?")
-            elif move == "hit":
+        move = input("Hit? or Stay?\n").lower()
+        if move != "hit" and move != "stay":
+            move = input("Hit? or Stay?")
+        elif move == "hit":
                 # call hit function
-                print("player hit")
+            print("player hit")
                 # draw_a_card(deck_id, player_hand)
-                data["move"] = move
-                return data
-            elif move == "stay":
+            data["move"] = move
+            return data
+        elif move == "stay":
                 #call stay function here
-                print(f"player is staying on {data['player_sum']}")
-                data["move"] = move
-                return data
-            else:
-                print("something else")
+            print(f"player is staying on {data['player_sum']}")
+            data["move"] = move
+            return data
+        else:
+            print("something else")
+    
+    def player_wins(self, data):
+        self.bankroll += data["bet"]
+        print(f"You win! you now have ${self.bankroll}.")
+
+    def player_loses(self, data):
+        self.bankroll -= data["bet"]
+        print(f"Sorry, the dealer wins. You now have ${self.bankroll}")
         
 
 
@@ -77,12 +84,21 @@ def start(player):
     hand_data = deck.play_hand(bet)
 
     while True:
-        player1.hit_or_stay(hand_data)
+        player.hit_or_stay(hand_data)
         if hand_data['move'] == "hit":
-            player1.player_hit(hand_data)
+            player.player_hit(hand_data)
+            if hand_data["player_sum"] > 21:
+                player.player_loses(hand_data)
+
         elif hand_data['move'] == "stay":
             print("This is where we compare hands")
-            print(hand_data)
+            result = deck.compare_hands(hand_data)
+            if result == "win":
+                player.player_wins(hand_data)
+            elif result == "lost":
+                player.player_loses(hand_data)
+    
+
         # This will be where we compare the player and dealer hands. also revealing the dealers hand to the player
 
 

@@ -65,29 +65,6 @@ def play_hand(bet):
         # need to add fucntionality for if dealer has blackjack
     return hand_data
     
-    # while True:
-    #     move = input("Hit? or Stay?\n").lower()
-    #     if move != "hit" and move != "stay":
-    #         move = input("Hit? or Stay?")
-    #     elif move == "hit":
-    #         # call hit function
-    #         print("player hit")
-    #         # draw_a_card(deck_id, player_hand)
-    #         hand_data["move"] = move
-    #         return hand_data
-    #     elif move == "stay":
-    #         #call stay function here
-    #         print(f"player is staying on {player_sum}")
-    #         hand_data["move"] = move
-    #         return hand_data
-    #     else:
-    #         print("something else")
-
-
-    
-    # need to make functionality for hitting or staying and adding the new values to the players hand 
-    # also need validation to the users input 
-    
 
 # checks is a hand is a blackjack
 def check_for_blackjack(num):
@@ -113,7 +90,11 @@ def sum_of_hand(hand):
 
     return total
 
+def compare_hands(data):
+    if data["player_sum"] > data["dealer_sum"]:
+        return "win"
+    elif data["dealer_sum"] > data["player_sum"]:
+        return "lost"
 
 
-# play_hand()
 
