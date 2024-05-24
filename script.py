@@ -20,15 +20,22 @@ class Player:
                 return self.bet
     
     def player_hit(self, data):
-        deck.draw_a_card(data)
+        hand = data["player_hand"]
+        deck_id = data["deck_id"]
+        new_hand = deck.draw_a_card(deck_id, hand)
+        data["player_hand"] = new_hand
         print(data["player_hand"])
         data["player_sum"] = deck.sum_of_hand(data["player_hand"])
-        print(f"You now have {data["player_sum"]}")
+        if data["player_sum"] > 21:
+            data["move"] = "end hand"
+            print(f"Sorry you bust with a {data["player_sum"]}.")
+        else:
+            print(f"You now have {data["player_sum"]}")
 
     def hit_or_stay(self, data):
         move = input("Hit? or Stay?\n").lower()
         if move != "hit" and move != "stay":
-            move = input("Hit? or Stay?")
+            move = input("Hit? or Stay?\n")
         elif move == "hit":
                 # call hit function
             print("player hit")
@@ -80,26 +87,70 @@ while True:
 player1 = Player(name, bankroll)
 
 def start(player):
+    deck_id = deck.new_deck()
+    deal(player, deck_id)
+
+
+def deal(player, deck_data):
     bet = player.place_bet()
-    hand_data = deck.play_hand(bet)
+    hand_data = deck.play_hand(bet, deck_data)
 
-    while True:
-        player.hit_or_stay(hand_data)
-        if hand_data['move'] == "hit":
-            player.player_hit(hand_data)
-            if hand_data["player_sum"] > 21:
-                player.player_loses(hand_data)
+    if deck.check_for_blackjack(hand_data["player_sum"]) == True and deck.check_for_blackjack(hand_data["dealer_sum"]) == False:
+        print("BLACKJACK! Dealer is checking their hand.")
+        player.player_wins(hand_data)
+    elif deck.check_for_blackjack(hand_data["dealer_sum"]) == True:
+        print("Dealer has Blackjack.")
+        player.player_loses(hand_data)
+    elif deck.check_for_blackjack(hand_data["player_sum"]) == True and deck.check_for_blackjack(hand_data["dealer_sum"]) == True:
+        print("Blackjack! Unfortunately dealer all so has Blackjack. Player pushes.")
+    else:
+        while hand_data["move"] != "end hand":
+            player.hit_or_stay(hand_data)
+            if hand_data['move'] == "hit":
+                player.player_hit(hand_data)
+                if hand_data["player_sum"] > 21:
+                    player.player_loses(hand_data)
+            elif hand_data['move'] == "stay":
+                dealers_turn(player, hand_data)
 
-        elif hand_data['move'] == "stay":
-            print("This is where we compare hands")
-            result = deck.compare_hands(hand_data)
-            if result == "win":
-                player.player_wins(hand_data)
-            elif result == "lost":
-                player.player_loses(hand_data)
+    play_again(player, deck_data)
+
+        
+def dealers_turn(player, data):
+    print("Dealers turn.")
+    print(data["dealer_hand"])
+    hand = data["dealer_hand"]
+    deck_id = data["deck_id"]
+    while data["dealer_sum"] < 17:
+        new_hand = deck.draw_a_card(deck_id, hand)
+        data["dealer_hand"] = new_hand
+        print(new_hand)
+        data["dealer_sum"] = deck.sum_of_hand(new_hand)
     
+    if data["dealer_sum"] >= 17 and data["dealer_sum"] <= 21:
+        print(f"Dealer has a {data["dealer_sum"]}")
+        result = deck.compare_hands(data)
+        if result == "win":
+            player.player_wins(data)
+        elif result == "lost":
+            player.player_loses(data)
+        elif result == 'draw':
+            print(f"Both you and the dealer have a {data["dealer_sum"]}. Player pushes.")
+    elif data["dealer_sum"] > 21:
+        print(f"Dealer busts with a {data["dealer_sum"]}")
+        player.player_wins(data)
 
-        # This will be where we compare the player and dealer hands. also revealing the dealers hand to the player
+    data["move"] = "end hand"
+
+    # play_again(player, data)
+
+
+def play_again(player, deck_data):
+    if deck.check_deck(deck_data):
+        deal(player, deck_data)
+    else:
+        start(player)
+
 
 
 
