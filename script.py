@@ -91,6 +91,7 @@ class Player:
                 start(self)
             else:
                 print("Thank you for playing Blackjack. Come play again soon.")
+                quit()
                 
         
 
@@ -161,6 +162,7 @@ def check_for_blackjack(player, data):
 def play_hand(player, data):
     # print(data)
     deck_id = data["deck_id"]
+    busts = 0
     for hand in data["player_hands"]:
         if len(data["player_hands"]) >= 2:
             print(f"Playing hand {hand["hand"]}.")
@@ -171,11 +173,15 @@ def play_hand(player, data):
                 player.player_hit(hand, deck_id)
                 if hand["player_sum"] > 21:
                     player.player_loses(hand)
-                    play_again(player, deck_id)
+                    hand["move"] = "end hand"
+                    busts += 1
             elif hand['move'] == "stay":
                 break
     # print(data)
-    dealers_turn(player, data)
+    if busts == len(data["player_hands"]):
+        play_again(player, deck_id)
+    else:
+        dealers_turn(player, data)
 
     play_again(player, deck_id)
         
