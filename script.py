@@ -17,6 +17,7 @@ class Player:
                     print("The table minimum per hand is $5.\n")
                 elif self.bet > self.bankroll:
                     print("Sorry, you do not have enough to money for that bet.\n")
+                    self.buy_more_chips()
                 else:
                     return self.bet
             except ValueError:
@@ -24,7 +25,7 @@ class Player:
 
     
     def player_hit(self, hand , deck_id):
-        print(hand)
+        # print(hand)
         new_hand = deck.draw_a_card(deck_id, hand["hand"])
         hand["hand"] = new_hand
         print(hand["hand"])
@@ -77,9 +78,17 @@ class Player:
     def player_loses(self, hand):
         self.bankroll -= hand["bet"]
         print(f"Sorry, the dealer wins. You now have ${self.bankroll}")
+
+    def buy_more_chips(self):
+        if self.bankroll == 0:
+            answer = input("Would you like to buy more chips to keep playing?\n")
+            if answer == "yes":
+                self.bankroll = int(input("How much would you like to buy?\n"))
+                print(f"Great! You now have {self.bankroll}. Please place your next bet.")
+            else:
+                print("Thank you for playing Blackjack. Come play again soon.")
+                
         
-
-
 
 # At the start of the game the user will input the amount of money they wish to start the game with
 name = input("Welcome to the blackjack table. What is your name?\n")
@@ -121,30 +130,36 @@ def deal(player, deck_data):
                 hands["player_hands"] = deck.split_hand(hand, deck_data)
     data = deck.get_game_data(hands, deck_data, bet)
 
-    any_blackjacks(player, data)
-    play_hand(player, data)
+    if check_for_blackjack(player, data):
+        play_again(player, deck_data)
+    else:
+        play_hand(player, data)
 
 
-def any_blackjacks(player, data):
+def check_for_blackjack(player, data):
     for hand in data["player_hands"]:
-        if deck.check_for_blackjack(hand["player_sum"]) == True and deck.check_for_blackjack(data["dealer_sum"]) == False:
-            print("BLACKJACK! Dealer is checking their hand.")
+        if hand["has_blackjack"] == True and data["dealer_has_blackjack"] == False:
+            print("BLACKJACK!")
             player.player_wins(hand)
-        elif deck.check_for_blackjack(data["dealer_sum"]) == True:
+            return True
+        elif data["dealer_has_blackjack"] == True:
             print("Dealer has Blackjack.")
             player.player_loses(hand)
-        elif deck.check_for_blackjack(hand["player_sum"]) == True and deck.check_for_blackjack(data["dealer_sum"]) == True:
-            print("Blackjack! Unfortunately dealer all so has Blackjack. Player pushes.")
+            return True
+        elif hand["has_blackjack"] == True and data["dealer_has_blackjack"] == True:
+            print("Blackjack! Unfortunately dealer also has Blackjack. Player pushes.")
+            return True
         else:
-            pass
+            return False
 
 
 
 def play_hand(player, data):
-    print(data)
+    # print(data)
     deck_id = data["deck_id"]
     for hand in data["player_hands"]:
-        print(f"Playing hand {hand["hand"]}.")
+        if len(data["player_hands"]) >= 2:
+            print(f"Playing hand {hand["hand"]}.")
         print(f"Sum of the hand is {hand["player_sum"]}.")
         while hand["move"] != "end hand":
             player.hit_or_stay(hand)
@@ -152,9 +167,10 @@ def play_hand(player, data):
                 player.player_hit(hand, deck_id)
                 if hand["player_sum"] > 21:
                     player.player_loses(hand)
+                    play_again(player, deck_id)
             elif hand['move'] == "stay":
                 break
-    print(data)
+    # print(data)
     dealers_turn(player, data)
 
     play_again(player, deck_id)

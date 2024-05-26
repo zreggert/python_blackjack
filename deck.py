@@ -4,7 +4,7 @@ import requests
 def new_deck():
     response = requests.get('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6')
     # print(response.status_code)
-    print(response.json())
+    # print(response.json())
     # setting deck id to the id provided in the the api response
     deck = response.json()['deck_id']
     # print(deck_id)
@@ -12,7 +12,7 @@ def new_deck():
 
 def check_deck(deck_id):
     response = requests.get(f'https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=0')
-    print(response.status_code)
+    # print(response.status_code)
     remaining = int(response.json()['remaining'])
     if remaining > 100:
         return True
@@ -28,7 +28,6 @@ def get_hand(deck_id):
     for item in cards.json()['cards']:
         card = (item['value'], item['suit'])
         hand.append(card)
-
     # test_hand_data = [('2', 'SPADES'), ('2', "HEARTS")]
     # return test_hand_data
     return hand
@@ -56,11 +55,6 @@ def split_hand(hand, deck):
 
     return hands
 
-    
-    
-
-
-
 # play hand function will call get_hand function to create plaer and dealer hands
 def deal_hands(deck):
     hands= {}
@@ -80,12 +74,21 @@ def get_game_data(hands, deck, bet):
     hand_data["deck_id"] = deck
     hand_data["dealer_hand"] = hands["dealer_hand"]
     hand_data["dealer_sum"] = sum_of_hand(hands["dealer_hand"])
+    if hand_data["dealer_sum"] == 21:
+        hand_data["dealer_has_blackjack"] = True
+    else:
+        hand_data["dealer_has_blackjack"] = False
+        
     hand_data["player_hands"] = []
     for hand in hands["player_hands"]:
         new_hand = {}
         new_hand["hand_id"] = hand_id
         new_hand["hand"] = hand
         new_hand["player_sum"] = sum_of_hand(hand)
+        if new_hand["player_sum"] == 21:
+            new_hand["has_blackjack"] = True
+        else:
+            new_hand["has_blackjack"] = False
         new_hand["bet"] = bet
         new_hand["move"] = ""
         hand_data["player_hands"].append(new_hand)
@@ -94,11 +97,11 @@ def get_game_data(hands, deck, bet):
     return hand_data
 
 # checks is a hand is a blackjack
-def check_for_blackjack(num):
-    if num == 21:
-        return True
-    else:
-        return False
+# def check_for_blackjack(num):
+#     if num == 21:
+#         return True
+#     else:
+#         return False
 
 # get the number value of a hand provided
 def sum_of_hand(hand):
@@ -130,7 +133,7 @@ def check_for_pair(hand):
 
 
 # test_hand = [('2', 'SPADES'), ('2', "HEARTS")]
-test_hand_data = {'player_hand': [('2', 'SPADES'), ('2', "HEARTS")]}
+# test_hand_data = {'player_hand': [('2', 'SPADES'), ('2', "HEARTS")]}
 
 
 
