@@ -9,19 +9,22 @@ class Player:
         return (f"Ok {self.name}, you are starting out with ${self.bankroll}. Please place your first bet.")
     
     def place_bet(self):
-        print("How much would you like to bet?")
-        while True:
-            try:
-                self.bet = int(input())
-                if self.bet < 5:
-                    print("The table minimum per hand is $5.\n")
-                elif self.bet > self.bankroll:
-                    print("Sorry, you do not have enough to money for that bet.\n")
-                    self.buy_more_chips()
-                else:
-                    return self.bet
-            except ValueError:
-                print("Please enter a numeric value of at least $5 to play your next hand.\n")
+        if self.bankroll == 0:
+            self.buy_more_chips()
+        else:
+            print("How much would you like to bet?")
+            while True:
+                try:
+                    self.bet = int(input())
+                    if self.bet < 5:
+                        print("The table minimum per hand is $5.\n")
+                    elif self.bet > self.bankroll:
+                        print("Sorry, you do not have enough to money for that bet.\n")
+                        self.buy_more_chips()
+                    else:
+                        return self.bet
+                except ValueError:
+                    print("Please enter a numeric value of at least $5 to play your next hand.\n")
 
     
     def player_hit(self, hand , deck_id):
@@ -84,7 +87,8 @@ class Player:
             answer = input("Would you like to buy more chips to keep playing?\n")
             if answer == "yes":
                 self.bankroll = int(input("How much would you like to buy?\n"))
-                print(f"Great! You now have {self.bankroll}. Please place your next bet.")
+                print(f"Great! You now have ${self.bankroll}. Please place your next bet.")
+                start(self)
             else:
                 print("Thank you for playing Blackjack. Come play again soon.")
                 
